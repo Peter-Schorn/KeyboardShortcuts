@@ -115,6 +115,17 @@ public enum KeyboardShortcuts {
 
 		return decoded
 	}
+    
+    
+    /// Get the name for a shortcut.
+    public static func getName(for shortcut: Shortcut) -> Name? {
+        for name in Name.allNames {
+            if getShortcut(for: name) == shortcut {
+                return name
+            }
+        }
+        return nil
+    }
 
 	private static let userDefaultsPrefix = "KeyboardShortcuts_"
 
