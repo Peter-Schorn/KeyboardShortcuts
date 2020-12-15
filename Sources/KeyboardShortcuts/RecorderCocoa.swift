@@ -160,7 +160,6 @@ extension KeyboardShortcuts {
 			KeyboardShortcuts.isPaused = true // The position here matters.
 
 			eventMonitor = LocalEventMonitor(events: [.keyDown, .leftMouseUp, .rightMouseUp]) { [weak self] event in
-                print("event monitor: \(event)")
 				guard let self = self else {
 					return nil
 				}
@@ -220,10 +219,10 @@ extension KeyboardShortcuts {
                 // check if the shortcut has already been registered for
                 // another name.
                 
-                print("allNames: \(Name.allNames.map(\.rawValue))")
+//                print("allNames: \(Name.allNames.map(\.rawValue))")
                 for name in Name.allNames {
                     if name == self.shortcutName {
-                        print("not checking current shortcut")
+//                        print("not checking current shortcut")
                         continue
                     }
                     guard let otherShortcut = getShortcut(for: name) else {
