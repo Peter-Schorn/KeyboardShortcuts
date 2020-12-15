@@ -79,6 +79,13 @@ public enum KeyboardShortcuts {
 		}
 	}
 
+    /// Resets all shortcuts to their default values.
+    public static func resetAll() {
+        for name in Name.allNames {
+            setShortcut(name.defaultShortcut, for: name)
+        }
+    }
+
 	/**
 	Set the keyboard shortcut for a name.
 
