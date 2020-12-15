@@ -155,12 +155,12 @@ extension KeyboardShortcuts {
 				return shouldBecomeFirstResponder
 			}
 
-			placeholderString = "Press Shortcut"
 			showsCancelButton = !stringValue.isEmpty
 			hideCaret()
 			KeyboardShortcuts.isPaused = true // The position here matters.
 
 			eventMonitor = LocalEventMonitor(events: [.keyDown, .leftMouseUp, .rightMouseUp]) { [weak self] event in
+                print("event monitor: \(event)")
 				guard let self = self else {
 					return nil
 				}
@@ -187,7 +187,7 @@ extension KeyboardShortcuts {
 					self.blur()
 
 					// We intentionally bubble up the event so it can focus the next responder.
-					return event
+                    return event
 				}
 
 				if
@@ -195,7 +195,7 @@ extension KeyboardShortcuts {
 					event.keyCode == kVK_Escape // TODO: Make this strongly typed.
 				{
 					self.blur()
-					return nil
+                    return nil
 				}
 
 				if
@@ -205,7 +205,7 @@ extension KeyboardShortcuts {
 						|| event.specialKey == .backspace
 				{
 					self.clear()
-					return nil
+                    return nil
 				}
 
 				guard
@@ -214,41 +214,31 @@ extension KeyboardShortcuts {
 					let shortcut = Shortcut(event: event)
 				else {
 					NSSound.beep()
-					return nil
+                    return nil
 				}
 
-				if let menuItem = shortcut.takenByMainMenu {
-					// TODO: Find a better way to make it possible to dismiss the alert by pressing "Enter". How can we make the input automatically temporarily lose focus while the alert is open?
-					self.blur()
-
-					NSAlert.showModal(
-						for: self.window,
-						message: "This keyboard shortcut cannot be used as it's already used by the “\(menuItem.title)” menu item."
-					)
-
-					self.focus()
-
-					return nil
-				}
-
-				guard !shortcut.isTakenBySystem else {
-					self.blur()
-
-					NSAlert.showModal(
-						for: self.window,
-						message: "This keyboard shortcut cannot be used as it's already a system-wide keyboard shortcut.",
-						// TODO: Add button to offer to open the relevant system preference pane for the user.
-						informativeText: "Most system-wide keyboard shortcuts can be changed in “System Preferences › Keyboard › Shortcuts“."
-					)
-
-					self.focus()
-
-					return nil
-				}
-
+                // check if the shortcut has already been registered for
+                // another name.
+                
+                print("allNames: \(Name.allNames.map(\.rawValue))")
+                for name in Name.allNames {
+                    if name == self.shortcutName {
+                        print("not checking current shortcut")
+                        continue
+                    }
+                    guard let otherShortcut = getShortcut(for: name) else {
+//                        print("no shortcut yet for \(name.rawValue)")
+                        continue
+                    }
+                    if otherShortcut == shortcut {
+//                        print("\(otherShortcut) already used for \(name.rawValue)")
+                        NSSound.beep()
+                        return nil
+                    }
+                }
+                
 				self.stringValue = "\(shortcut)"
 				self.showsCancelButton = true
-
 				self.saveShortcut(shortcut)
 				self.blur()
 

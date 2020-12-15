@@ -13,10 +13,14 @@ extension KeyboardShortcuts {
 	```
 	*/
 	public struct Name: Hashable {
-		// This makes it possible to use `Shortcut` without the namespace.
+		
+        // This makes it possible to use `Shortcut` without the namespace.
 		/// :nodoc:
 		public typealias Shortcut = KeyboardShortcuts.Shortcut
 
+        /// All of the shortcut names.
+        public private(set) static var allNames: Set<Self> = []
+        
 		public let rawValue: String
 		public let defaultShortcut: Shortcut?
 
@@ -27,6 +31,7 @@ extension KeyboardShortcuts {
 		public init(_ name: String, default defaultShortcut: Shortcut? = nil) {
 			self.rawValue = name
 			self.defaultShortcut = defaultShortcut
+            Self.allNames.insert(self)
 
 			if
 				let defaultShortcut = defaultShortcut,
