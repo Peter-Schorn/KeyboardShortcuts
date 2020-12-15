@@ -244,8 +244,9 @@ extension NSEvent.ModifierFlags: CustomStringConvertible {
 }
 
 
-extension NSEvent.SpecialKey {
-	static let functionKeys: Set<Self> = [
+public extension NSEvent.SpecialKey {
+	
+    static let functionKeys: Set<Self> = [
 		.f1,
 		.f2,
 		.f3,
