@@ -159,7 +159,10 @@ extension KeyboardShortcuts {
 			hideCaret()
 			KeyboardShortcuts.isPaused = true // The position here matters.
 
-			eventMonitor = LocalEventMonitor(events: [.keyDown, .leftMouseUp, .rightMouseUp]) { [weak self] event in
+			eventMonitor = LocalEventMonitor(
+                events: [.keyDown, .leftMouseUp, .rightMouseUp]
+            ) { [weak self] event in
+                
 				guard let self = self else {
 					return nil
 				}
@@ -167,9 +170,10 @@ extension KeyboardShortcuts {
 				let clickPoint = self.convert(event.locationInWindow, from: nil)
 				let clickMargin: CGFloat = 3
 
-				if
-					event.type == .leftMouseUp || event.type == .rightMouseUp,
-					!self.frame.insetBy(dx: -clickMargin, dy: -clickMargin).contains(clickPoint)
+				if event.type == .leftMouseUp || event.type == .rightMouseUp,
+                        !self.frame.insetBy(
+                            dx: -clickMargin, dy: -clickMargin
+                        ).contains(clickPoint)
 				{
 					self.blur()
 					return nil
@@ -179,38 +183,29 @@ extension KeyboardShortcuts {
 					return nil
 				}
 
-				if
-					event.modifiers.isEmpty,
-					event.specialKey == .tab
-				{
-					self.blur()
-
-					// We intentionally bubble up the event so it can focus the next responder.
-                    return event
-				}
-
-				if
-					event.modifiers.isEmpty,
-					event.keyCode == kVK_Escape // TODO: Make this strongly typed.
-				{
-					self.blur()
-                    return nil
-				}
-
-				if
-					event.modifiers.isEmpty,
-					event.specialKey == .delete
-						|| event.specialKey == .deleteForward
-						|| event.specialKey == .backspace
-				{
-					self.clear()
-                    return nil
-				}
-
-				guard
-					!event.modifiers.isEmpty
-						|| event.specialKey?.isFunctionKey == true,
-					let shortcut = Shortcut(event: event)
+                
+                
+                if event.modifiers.isEmpty {
+                    if event.specialKey == .tab {
+                        self.blur()
+                        // We intentionally bubble up the event so it can
+                        // focus the next responder.
+                        return event
+                    }
+                    if event.keyCode == kVK_Escape {
+                        self.blur()
+                        return nil
+                    }
+                    if [.delete, .deleteForward, .backspace]
+                            .contains(event.specialKey) {
+                        self.clear()
+                        return nil
+                    }
+                }
+                
+				guard event.modifiers.contains(.command)
+                        || event.specialKey?.isFunctionKey == true,
+                        let shortcut = Shortcut(event: event)
 				else {
 					NSSound.beep()
                     return nil

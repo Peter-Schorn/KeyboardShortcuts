@@ -2,10 +2,15 @@ import Cocoa
 import Carbon.HIToolbox
 
 extension KeyboardShortcuts {
+    
 	/// A keyboard shortcut.
-	public struct Shortcut: Hashable, Codable {
-		/// Carbon modifiers are not always stored as the same number.
-		/// For example, the system has `⌃F2` stored with the modifiers number `135168`, but if you press the keyboard shortcut, you get `4096`.
+	
+    public struct Shortcut: Hashable, Codable {
+	
+        /// Carbon modifiers are not always stored as the same number.
+		/// For example, the system has `⌃F2` stored with the modifiers
+        /// number `135168`, but if you press the keyboard shortcut,
+        /// you get `4096`.
 		private static func normalizeModifiers(_ carbonModifiers: Int) -> Int {
 			NSEvent.ModifierFlags(carbon: carbonModifiers).carbon
 		}
@@ -14,7 +19,10 @@ extension KeyboardShortcuts {
 		public var key: Key? { Key(rawValue: carbonKeyCode) }
 
 		/// The modifier keys of the shortcut.
-		public var modifiers: NSEvent.ModifierFlags { NSEvent.ModifierFlags(carbon: carbonModifiers) }
+		public var modifiers: NSEvent.ModifierFlags {
+            NSEvent.ModifierFlags(carbon: carbonModifiers)
+            
+        }
 
 		/// Low-level represetation of the key.
 		/// You most likely don't need this.
@@ -44,7 +52,8 @@ extension KeyboardShortcuts {
 			)
 		}
 
-		/// Initialize from a keyboard shortcut stored by `Recorder` or `RecorderCocoa`.
+		/// Initialize from a keyboard shortcut stored by `Recorder` or
+        /// `RecorderCocoa`.
 		public init?(name: Name) {
 			guard let shortcut = getShortcut(for: name) else {
 				return nil
@@ -71,7 +80,9 @@ extension KeyboardShortcuts.Shortcut {
 }
 
 extension KeyboardShortcuts.Shortcut {
-	/// Recursively finds a menu item in the given menu that has a matching key equivalent and modifier.
+    
+	/// Recursively finds a menu item in the given menu that has a matching key
+    /// equivalent and modifier.
 	func menuItemWithMatchingShortcut(in menu: NSMenu) -> NSMenuItem? {
 		for item in menu.items {
 			if
@@ -92,7 +103,8 @@ extension KeyboardShortcuts.Shortcut {
 		return nil
 	}
 
-	/// Returns a menu item in the app's main menu that has a matching key equivalent and modifier.
+	/// Returns a menu item in the app's main menu that has a matching key
+    /// equivalent and modifier.
 	var takenByMainMenu: NSMenuItem? {
 		guard let mainMenu = NSApp.mainMenu else {
 			return nil
@@ -170,8 +182,16 @@ private var keyToKeyEquivalentString: [KeyboardShortcuts.Key: String] = [
 
 extension KeyboardShortcuts.Shortcut {
 	fileprivate func keyToCharacter() -> String? {
-		// `TISCopyCurrentASCIICapableKeyboardLayoutInputSource` works on a background thread, but crashes when used in a `NSBackgroundActivityScheduler` task, so we guard against that. It only crashes when running from Xcode, not in release builds, but it's probably safest to not call it from a `NSBackgroundActivityScheduler` no matter what.
-		assert(!DispatchQueue.isCurrentQueueNSBackgroundActivitySchedulerQueue, "This method cannot be used in a `NSBackgroundActivityScheduler` task")
+		// `TISCopyCurrentASCIICapableKeyboardLayoutInputSource` works on a
+        // background thread, but crashes when used in a
+        // `NSBackgroundActivityScheduler` task, so we guard against that.
+        // It only crashes when running from Xcode, not in release builds,
+        // but it's probably safest to not call it from a
+        // `NSBackgroundActivityScheduler` no matter what.
+		assert(
+            !DispatchQueue.isCurrentQueueNSBackgroundActivitySchedulerQueue,
+            "This method cannot be used in a `NSBackgroundActivityScheduler` task"
+        )
 
 		// Some characters cannot be automatically translated.
 		if
@@ -182,14 +202,20 @@ extension KeyboardShortcuts.Shortcut {
 		}
 
 		guard
-			let source = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),
-			let layoutDataPointer = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData)
+			let source = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?
+                .takeRetainedValue(),
+			let layoutDataPointer = TISGetInputSourceProperty(
+                source, kTISPropertyUnicodeKeyLayoutData
+            )
 		else {
 			return nil
 		}
 
 		let layoutData = unsafeBitCast(layoutDataPointer, to: CFData.self)
-		let keyLayout = unsafeBitCast(CFDataGetBytePtr(layoutData), to: UnsafePointer<CoreServices.UCKeyboardLayout>.self)
+		let keyLayout = unsafeBitCast(
+            CFDataGetBytePtr(layoutData),
+            to: UnsafePointer<CoreServices.UCKeyboardLayout>.self
+        )
 		var deadKeyState: UInt32 = 0
 		let maxLength = 4
 		var length = 0
@@ -215,11 +241,14 @@ extension KeyboardShortcuts.Shortcut {
 		return String(utf16CodeUnits: characters, count: length)
 	}
 
-	// This can be exposed if anyone needs it, but I prefer to keep the API surface small for now.
+	// This can be exposed if anyone needs it, but I prefer to keep the API
+    // surface small for now.
 	/**
-	This can be used to show the keyboard shortcut in a `NSMenuItem` by assigning it to `NSMenuItem#keyEquivalent`.
+	This can be used to show the keyboard shortcut in a `NSMenuItem` by assigning
+    it to `NSMenuItem#keyEquivalent`.
 
-	- Note: Don't forget to also pass `.modifiers` to `NSMenuItem#keyEquivalentModifierMask`.
+	- Note: Don't forget to also pass `.modifiers` to
+     `NSMenuItem#keyEquivalentModifierMask`.
 	*/
 	var keyEquivalent: String {
 		let keyString = keyToCharacter() ?? ""
