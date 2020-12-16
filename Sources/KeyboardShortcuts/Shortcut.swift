@@ -181,7 +181,8 @@ private var keyToKeyEquivalentString: [KeyboardShortcuts.Key: String] = [
 ]
 
 extension KeyboardShortcuts.Shortcut {
-	fileprivate func keyToCharacter() -> String? {
+    
+	public func keyToCharacter() -> String? {
 		// `TISCopyCurrentASCIICapableKeyboardLayoutInputSource` works on a
         // background thread, but crashes when used in a
         // `NSBackgroundActivityScheduler` task, so we guard against that.
@@ -250,7 +251,7 @@ extension KeyboardShortcuts.Shortcut {
 	- Note: Don't forget to also pass `.modifiers` to
      `NSMenuItem#keyEquivalentModifierMask`.
 	*/
-	var keyEquivalent: String {
+	public var keyEquivalent: String {
 		let keyString = keyToCharacter() ?? ""
 
 		guard keyString.count <= 1 else {

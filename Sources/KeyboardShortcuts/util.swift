@@ -43,12 +43,12 @@ eventMonitor = LocalEventMonitor(events: [.leftMouseDown, .rightMouseDown]) { ev
 }.start()
 ```
 */
-final class LocalEventMonitor {
+public final class LocalEventMonitor {
 	private let events: NSEvent.EventTypeMask
 	private let callback: (NSEvent) -> NSEvent?
 	private weak var monitor: AnyObject?
 
-	init(events: NSEvent.EventTypeMask, callback: @escaping (NSEvent) -> NSEvent?) {
+	public init(events: NSEvent.EventTypeMask, callback: @escaping (NSEvent) -> NSEvent?) {
 		self.events = events
 		self.callback = callback
 	}
@@ -58,12 +58,12 @@ final class LocalEventMonitor {
 	}
 
 	@discardableResult
-	func start() -> Self {
+	public func start() -> Self {
 		monitor = NSEvent.addLocalMonitorForEvents(matching: events, handler: callback) as AnyObject
 		return self
 	}
 
-	func stop() {
+	public func stop() {
 		guard let monitor = monitor else {
 			return
 		}

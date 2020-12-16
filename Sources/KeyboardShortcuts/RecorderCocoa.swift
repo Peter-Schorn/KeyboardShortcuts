@@ -1,5 +1,6 @@
 import Cocoa
 import Carbon.HIToolbox
+import SwiftUI
 
 extension KeyboardShortcuts {
 	/**
@@ -203,13 +204,21 @@ extension KeyboardShortcuts {
                     }
                 }
                 
-				guard event.modifiers.contains(.command)
-                        || event.specialKey?.isFunctionKey == true,
+				guard event.modifiers.contains(.command),
                         let shortcut = Shortcut(event: event)
 				else {
 					NSSound.beep()
                     return nil
 				}
+                
+                // disable shortcuts that can't be converted to SwiftUI
+                // `KeyboardShortcut`s.
+                if #available(macOS 11.0, *) {
+                    if KeyboardShortcut(shortcut) == nil {
+                        NSSound.beep()
+                        return nil
+                    }
+                }
 
                 // check if the shortcut has already been registered for
                 // another name.
